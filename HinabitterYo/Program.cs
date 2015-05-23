@@ -10,17 +10,33 @@ namespace HinabitterYo
 {
     class Program
     {
-        
-
         static void Main(string[] args)
         {
             var facebook = new FacebookConnect();
 
             var hina = facebook.Hinabitter();
             var coco = facebook.Coconatsu();
-            Console.WriteLine("id:{0}, from:{1}", hina.ID, hina.From);
-            Console.WriteLine("id:{0}, from:{1}", coco.ID, coco.From);
 
+            using (var yo = new Yo())
+            {
+                if (hina.ID > Properties.Settings.Default.HinabitterLastId)
+                {
+                    if (yo.YoAll(hina))
+                    {
+                        Properties.Settings.Default.HinabitterLastId = hina.ID;
+                        Properties.Settings.Default.Save();
+                    }
+                }
+
+                if (coco.ID > Properties.Settings.Default.CoconatsuLastId)
+                {
+                    if (yo.YoAll(coco))
+                    {
+                        Properties.Settings.Default.CoconatsuLastId = coco.ID;
+                        Properties.Settings.Default.Save();
+                    }
+                }
+            }
         }
     }
 }

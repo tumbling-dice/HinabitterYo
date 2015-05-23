@@ -8,7 +8,7 @@ namespace HinabitterYo
 {
     class FacebookItem
     {
-        public string ID { get; set; }
+        public long ID { get; set; }
         public string Link { get; set; }
         public string From { get; set; }
     }

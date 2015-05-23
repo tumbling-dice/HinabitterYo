@@ -50,7 +50,7 @@ namespace HinabitterYo
 
             var item = new FacebookItem
             {
-                ID = ((string)data.id).Split('_')[1],
+                ID = long.Parse(((string)data.id).Split('_')[1]),
                 From = ((string)data.message).Split('\n').Last()
             };
 
