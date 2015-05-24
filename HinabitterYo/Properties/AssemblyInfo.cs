@@ -1,4 +1,15 @@
-﻿using System.Reflection;
+﻿#region License
+/**
+ * HinabitaYo
+ *
+ * Copyright (c) 2015 @inujini_ (https://twitter.com/inujini_)
+ *
+ * This software is released under the MIT License.
+ * http://opensource.org/licenses/mit-license.php
+ */
+#endregion
+
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
