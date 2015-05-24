@@ -14,6 +14,7 @@ namespace HinabitterYo
         private static readonly ILog _logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         private readonly FacebookClient _client;
 
+
         public FacebookConnect()
         {
             _client = new FacebookClient
@@ -42,17 +43,17 @@ namespace HinabitterYo
             });
         }
 
-        public Task<FacebookItem> Hinabitter()
+        public Task<List<FacebookItem>> Hinabitter(long lastId)
         {
-            return CreateItem(Account.hinabitter);
+            return CreateItems(Account.hinabitter, lastId);
         }
 
-        public Task<FacebookItem> Coconatsu()
+        public Task<List<FacebookItem>> Coconatsu(long lastId)
         {
-            return CreateItem(Account.coconatsu5572);
+            return CreateItems(Account.coconatsu5572, lastId);
         }
 
-        private Task<FacebookItem> CreateItem(Account account)
+        private Task<List<FacebookItem>> CreateItems(Account account, long lastId)
         {
             var accountName = account.GetAccountName();
 
@@ -69,18 +70,38 @@ namespace HinabitterYo
                 }
 
                 dynamic feed = t.Result;
-                dynamic data = feed.data[0];
+                dynamic datas = feed.data;
 
-                var item = new FacebookItem
+                var items = new List<FacebookItem>();
+
+                foreach(var data in datas)
                 {
-                    ID = long.Parse(((string)data.id).Split('_')[1]),
-                    From = ((string)data.message).Split('\n').Last(),
-                    FromAccount = account,
-                };
+                    var id = long.Parse(((string)data.id).Split('_')[1]);
 
-                item.Link = string.Format("https://www.facebook.com/{0}/posts/{1}", accountName, item.ID);
+                    if (lastId >= id) continue;
 
-                return item;
+                    var message = (string)data.message;
+
+                    if(message == null)
+                    {
+                        continue;
+                    }
+
+                    var item = new FacebookItem
+                    {
+                        ID = id,
+                        From = message.Split('\n').Last(),
+                        FromAccount = account,
+                    };
+
+                    item.Link = string.Format("https://www.facebook.com/{0}/posts/{1}", accountName, item.ID);
+
+                    items.Add(item);
+
+                    _logger.InfoFormat("{0}: add yo queue. id:{1}", accountName, item.ID);
+                }
+
+                return items;
             });
 
         }

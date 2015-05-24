@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Configuration;
 using System.Web;
 using log4net;
@@ -26,37 +25,43 @@ namespace HinabitterYo
             API_KEY = ConfigurationManager.AppSettings["YoKey"];
         }
 
-        public bool YoAll(FacebookItem item)
+        public void YoAll(List<FacebookItem> items)
         {
-            var query = HttpUtility.ParseQueryString("");
-            query["api_token"] = API_KEY;
-            query["link"] = item.Link;
 
-            return _client.PostAsync(URI_YO_ALL, new StringContent(query.ToString(), Encoding.UTF8, "application/x-www-form-urlencoded"))
-                .ContinueWith(t =>
-                {
-                    if (t.Exception != null)
-                    {
-                        foreach (var e in t.Exception.InnerExceptions)
+            foreach (var item in items)
+            {
+                var query = HttpUtility.ParseQueryString("");
+                query["api_token"] = API_KEY;
+                query["link"] = item.Link;
+
+                _client.PostAsync(URI_YO_ALL, new StringContent(query.ToString(), Encoding.UTF8, "application/x-www-form-urlencoded"))
+                        .ContinueWith(t =>
                         {
-                            _logger.Fatal("yo is failed.", e);
-                        }
-                        return false;
-                    }
+                            if (t.Exception != null)
+                            {
+                                foreach (var e in t.Exception.InnerExceptions)
+                                {
+                                    _logger.Fatal("yo is failed.", e);
+                                }
+                                return;
+                            }
 
-                    var r = t.Result;
+                            var r = t.Result;
 
-                    if (r.IsSuccessStatusCode)
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        _logger.Error(string.Format("yo is failed. status code:{0} return message:{1}"
-                            , r.StatusCode, r.Content.ReadAsStringAsync().Result));
-                        return false;
-                    }
-                }).Result;
+                            if (r.IsSuccessStatusCode)
+                            {
+                                _logger.InfoFormat("{0}: sent yo. id:{1}", item.FromAccount.GetAccountName(), item.ID);
+                            }
+                            else
+                            {
+                                _logger.Error(string.Format("yo is failed. status code:{0} return message:{1}"
+                                    , r.StatusCode, r.Content.ReadAsStringAsync().Result));
+                            }
+                        });
+
+
+                Thread.Sleep(TimeSpan.FromMinutes(1));
+            }
         }
 
         #region IDisposable Support
@@ -79,8 +84,8 @@ namespace HinabitterYo
         {
             Dispose(true);
         }
-        #endregion
 
+        #endregion
 
     }
 }

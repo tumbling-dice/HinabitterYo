@@ -16,54 +16,54 @@ namespace HinabitterYo
             _logger.Info("connect to Facebook.");
             var facebook = new FacebookConnect();
 
-            var tasks = new Task[] {
-                facebook.Hinabitter().ContinueWith(_sendYo),
-                facebook.Coconatsu().ContinueWith(_sendYo),
+            var props = Properties.Settings.Default;
+
+            var tasks = new Task<List<FacebookItem>>[] {
+                facebook.Hinabitter(props.HinabitterLastId),
+                facebook.Coconatsu(props.CoconatsuLastId),
             };
 
             if (Task.WaitAll(tasks, -1))
             {
-                _logger.Info("end task.");
-            }
-        }
+                var yoQueues = tasks.Where(x => !x.IsFaulted)
+                                         .SelectMany(x => x.Result)
+                                         .OrderBy(x => x.ID)
+                                         .ToList();
 
-        private static Action<Task<FacebookItem>> _sendYo = t =>
-        {
-            if (t.IsFaulted) return;
-
-            using (var yo = new Yo())
-            {
-                var r = t.Result;
-                var props = Properties.Settings.Default;
-                var accountName = r.FromAccount.GetAccountName();
-
-                _logger.InfoFormat("{0}: check last id.", accountName);
-
-                var lastId = Account.hinabitter == r.FromAccount
-                            ? props.HinabitterLastId
-                            : props.CoconatsuLastId;
-
-                _logger.InfoFormat("{0}: newly id:{1}, last id:{2}", accountName, r.ID, lastId);
-
-                if (r.ID > lastId && yo.YoAll(r))
+                if (!yoQueues.Any())
                 {
-                    _logger.InfoFormat("{0}: sent yo.", accountName);
-                    switch (r.FromAccount)
+                    _logger.Info("no yoQueues. finish.");
+                    return;
+                }
+
+                using (var yo = new Yo())
+                {
+                    yo.YoAll(yoQueues);
+
+                    foreach (var ids in yoQueues.GroupBy(x => x.FromAccount, y => y.ID).ToDictionary(x => x.Key, y => y.Max()))
                     {
-                        case Account.hinabitter:
-                            props.HinabitterLastId = r.ID;
-                            break;
-                        case Account.coconatsu5572:
-                            props.CoconatsuLastId = r.ID;
-                            break;
-                        default:
-                            _logger.WarnFormat("{0} is unknown account.", accountName);
-                            break;
+                        var accountName = ids.Key.GetAccountName();
+
+                        switch (ids.Key)
+                        {
+                            case Account.hinabitter:
+                                props.HinabitterLastId = ids.Value;
+                                break;
+                            case Account.coconatsu5572:
+                                props.CoconatsuLastId = ids.Value;
+                                break;
+                            default:
+                                _logger.WarnFormat("{0} is unknown account.", accountName);
+                                break;
+                        }
                     }
 
                     props.Save();
+
+                    _logger.Info("finish!");
                 }
+
             }
-        };
+        }
     }
 }
