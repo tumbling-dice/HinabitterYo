@@ -5,14 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 using Facebook;
 using System.Configuration;
+using log4net;
 
 namespace HinabitterYo
 {
     class FacebookConnect
     {
+        private static readonly ILog _logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         private readonly FacebookClient _client;
-        private const string ACC_HINABITETR = "hinabitter";
-        private const string ACC_COCONATSU = "coconatsu5572";
 
         public FacebookConnect()
         {
@@ -30,33 +30,60 @@ namespace HinabitterYo
                 client_secret = ConfigurationManager.AppSettings["SecretKey"],
                 grant_type = "fb_exchange_token",
                 fb_exchange_token = ConfigurationManager.AppSettings["AccessToken"],
+            }).ContinueWith(t =>
+            {
+                if (t.Exception != null)
+                {
+                    foreach (var e in t.Exception.InnerExceptions)
+                    {
+                        _logger.Warn("extend access_token expire is failed.", e);
+                    }
+                }
             });
         }
 
-        public FacebookItem Hinabitter()
+        public Task<FacebookItem> Hinabitter()
         {
-            return CreateItem(ACC_HINABITETR);
+            return CreateItem(Account.hinabitter);
         }
 
-        public FacebookItem Coconatsu()
+        public Task<FacebookItem> Coconatsu()
         {
-            return CreateItem(ACC_COCONATSU);
+            return CreateItem(Account.coconatsu5572);
         }
 
-        private FacebookItem CreateItem(string account)
+        private Task<FacebookItem> CreateItem(Account account)
         {
-            dynamic feed = _client.Get(string.Format("{0}/feed", account));
-            dynamic data = feed.data[0];
+            var accountName = account.GetAccountName();
 
-            var item = new FacebookItem
+            return _client.GetTaskAsync(string.Format("{0}/feed", accountName)).ContinueWith(t =>
             {
-                ID = long.Parse(((string)data.id).Split('_')[1]),
-                From = ((string)data.message).Split('\n').Last()
-            };
+                if (t.Exception != null)
+                {
+                    foreach (var e in t.Exception.InnerExceptions)
+                    {
+                        _logger.Fatal(string.Format("to get {0}'s feed is failed.", accountName), e);
+                    }
 
-            item.Link = string.Format("https://www.facebook.com/{0}/posts/{1}", account, item.ID);
+                    throw t.Exception;
+                }
 
-            return item;
+                dynamic feed = t.Result;
+                dynamic data = feed.data[0];
+
+                var item = new FacebookItem
+                {
+                    ID = long.Parse(((string)data.id).Split('_')[1]),
+                    From = ((string)data.message).Split('\n').Last(),
+                    FromAccount = account,
+                };
+
+                item.Link = string.Format("https://www.facebook.com/{0}/posts/{1}", accountName, item.ID);
+
+                return item;
+            });
+
         }
+
     }
 }
