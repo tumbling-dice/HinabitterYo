@@ -47,6 +47,7 @@ namespace HinabitterYo
                     return;
                 }
 
+                
                 using (var yo = new Yo())
                 {
                     yo.YoAll(yoQueues);
@@ -73,6 +74,7 @@ namespace HinabitterYo
 
                     _logger.Info("finish!");
                 }
+                
 
             }
         }

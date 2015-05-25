@@ -34,24 +34,6 @@ namespace HinabitterYo
                 AppSecret = ConfigurationManager.AppSettings["SecretKey"],
                 AccessToken = ConfigurationManager.AppSettings["AccessToken"]
             };
-
-            // auto extend access_token expire
-            _client.GetTaskAsync("oauth/access_token", new
-            {
-                client_id = ConfigurationManager.AppSettings["AppId"],
-                client_secret = ConfigurationManager.AppSettings["SecretKey"],
-                grant_type = "fb_exchange_token",
-                fb_exchange_token = ConfigurationManager.AppSettings["AccessToken"],
-            }).ContinueWith(t =>
-            {
-                if (t.Exception != null)
-                {
-                    foreach (var e in t.Exception.InnerExceptions)
-                    {
-                        _logger.Warn("extend access_token expire is failed.", e);
-                    }
-                }
-            });
         }
 
         public Task<List<FacebookItem>> Hinabitter(long lastId)
