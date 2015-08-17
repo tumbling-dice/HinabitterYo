@@ -36,7 +36,7 @@ namespace HinabitterYo
             API_KEY = ConfigurationManager.AppSettings["YoKey"];
         }
 
-        public void YoAll(List<FacebookItem> items)
+        public void YoAll(List<IYoItem> items)
         {
 
             foreach (var item in items)

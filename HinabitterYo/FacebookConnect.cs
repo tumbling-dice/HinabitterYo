@@ -36,17 +36,17 @@ namespace HinabitterYo
             };
         }
 
-        public Task<List<FacebookItem>> Hinabitter(long lastId)
+        public Task<List<IYoItem>> Hinabitter(long lastId)
         {
             return CreateItems(Account.hinabitter, lastId);
         }
 
-        public Task<List<FacebookItem>> Coconatsu(long lastId)
+        public Task<List<IYoItem>> Coconatsu(long lastId)
         {
             return CreateItems(Account.coconatsu5572, lastId);
         }
 
-        private Task<List<FacebookItem>> CreateItems(Account account, long lastId)
+        private Task<List<IYoItem>> CreateItems(Account account, long lastId)
         {
             var accountName = account.GetAccountName();
 
@@ -65,7 +65,7 @@ namespace HinabitterYo
                 dynamic feed = t.Result;
                 dynamic datas = feed.data;
 
-                var items = new List<FacebookItem>();
+                var items = new List<IYoItem>();
 
                 foreach(var data in datas)
                 {
