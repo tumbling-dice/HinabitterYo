@@ -5,6 +5,8 @@ using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Codeplex.Data;
+using System.Net.Http;
 
 namespace HinabitterYo
 {
@@ -13,6 +15,8 @@ namespace HinabitterYo
         private static readonly ILog _logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         private const string KURANOGAWA_LETTER_URL = "http://p.eagate.573.jp/game/bemani/hinabita/p/kuranogawa/";
+        private const string KURANOGAWA_APP_URL = "http://eam.573.jp/app/web/post/index.php?format=json&list_type=12&limit=5";
+        private const string KURANOGAWA_APP_DETAIL_URL = "http://eam.573.jp/app/web/post/detail.php?post_id={0}";
 
         public static Task<List<IYoItem>> FromLetter(long lastId)
         {
@@ -56,5 +60,24 @@ namespace HinabitterYo
 
             });
         }
+
+        public static async Task<List<IYoItem>> FromApp(long lastId)
+        {
+            using (var hc = new HttpClient())
+            {
+                hc.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0");
+                var r = await hc.GetStringAsync(KURANOGAWA_APP_URL);
+                dynamic json = DynamicJson.Parse(r);
+
+                return ((dynamic[])json.post_list).Select(x => new KuranogawaItem
+                {
+                    ID = long.Parse(x.post_id),
+                    Link = string.Format(KURANOGAWA_APP_DETAIL_URL, x.post_id),
+                    From = x.nick_name,
+                    FromAccount = Account.kuranogawa_app
+                }).Where(x => x.ID > lastId).Select(x => x as IYoItem).ToList();
+            }
+        }
+
     }
 }

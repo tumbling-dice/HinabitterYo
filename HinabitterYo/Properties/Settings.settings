@@ -9,7 +9,10 @@
       <Value Profile="(Default)">0</Value>
     </Setting>
     <Setting Name="KuranogawaLastDay" Type="System.Int64" Scope="User">
-      <Value Profile="(Default)">20150807163000</Value>
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="KuranogawaLastAppId" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">0</Value>
     </Setting>
   </Settings>
 </SettingsFile>

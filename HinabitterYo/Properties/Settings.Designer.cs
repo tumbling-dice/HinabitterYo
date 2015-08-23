@@ -49,13 +49,25 @@ namespace HinabitterYo.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("20150807163000")]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
         public long KuranogawaLastDay {
             get {
                 return ((long)(this["KuranogawaLastDay"]));
             }
             set {
                 this["KuranogawaLastDay"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public long KuranogawaLastAppId {
+            get {
+                return ((long)(this["KuranogawaLastAppId"]));
+            }
+            set {
+                this["KuranogawaLastAppId"] = value;
             }
         }
     }

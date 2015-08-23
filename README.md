@@ -2,6 +2,7 @@
 
 * [ひなビタ](https://www.facebook.com/hinabitter)と[ここなつ](https://www.facebook.com/coconatsu5572)のFBが更新されたらYoする
 * [倉野川観光課だより](http://p.eagate.573.jp/game/bemani/hinabita/p/kuranogawa/)も更新されたらYoする
+    * 「現在の倉野川市」もYoで通知
 * 大体30分周期で更新をチェックする
     * ただし、更新をチェックするのは09:00～24:00のみ（健康）
 * yoに該当postのリンクがはられているのでいちいちFacebookを見る必要はない（便利）

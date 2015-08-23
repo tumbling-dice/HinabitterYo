@@ -33,6 +33,7 @@ namespace HinabitterYo
                 facebook.Hinabitter(props.HinabitterLastId),
                 facebook.Coconatsu(props.CoconatsuLastId),
                 Kuranogawa.FromLetter(props.KuranogawaLastDay),
+                Kuranogawa.FromApp(props.KuranogawaLastAppId),
             };
 
             if (Task.WaitAll(tasks, -1))
@@ -67,6 +68,9 @@ namespace HinabitterYo
                                 break;
                             case Account.kuranogawa:
                                 props.KuranogawaLastDay = ids.Value;
+                                break;
+                            case Account.kuranogawa_app:
+                                props.KuranogawaLastAppId = ids.Value;
                                 break;
                             default:
                                 _logger.WarnFormat("{0} is unknown account.", accountName);
